@@ -3,6 +3,7 @@
 Based on the work of https://github.com/hjdhjd/myq this library implements support for logging into the MyQ service, querying devices & sending commands. Currently in use with some of my own home automation code & services.
 
 Logging in and triggering is as simple as:
+
             var client = new NMyQClient(logger);
             string username = "";
             string password = "";
