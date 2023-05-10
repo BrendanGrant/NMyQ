@@ -22,7 +22,7 @@ namespace NMyQ.Models
 
     public class AccountInfoResponse
     {
-        public List<Account> accounts { get; set; }
+        public List<Account>? accounts { get; set; }
     }
 
 

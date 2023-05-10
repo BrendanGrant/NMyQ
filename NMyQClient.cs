@@ -26,10 +26,7 @@ namespace NMyQ
 
 
 
-        public NMyQClient(ILogger logger)
-        {
-            this.logger = logger;
-        }
+        public NMyQClient(ILogger logger) => this.logger = logger;
 
         public async Task Login(string username, string password, string account = "")
         {
@@ -53,7 +50,7 @@ namespace NMyQ
         }
 
         #region Login Helpers
-        public static HttpClient CreateFreshClient(bool allowAutoRedirect = true, string cookie = null)
+        public static HttpClient CreateFreshClient(bool allowAutoRedirect = true, string cookie = "")
         {
             var client = new HttpClient(new HttpClientHandler() { AllowAutoRedirect = allowAutoRedirect });
 
@@ -222,6 +219,7 @@ namespace NMyQ
 
                 var newToken = await PostAsync<Token>(MyQURLs.TokenUri, content2);
                 CreateConfigAndSave(newToken);
+                client = new RestClient();
                 client.AddDefaultHeader("Authorization", GetBearerTokenString());
             }
             else
@@ -269,6 +267,7 @@ namespace NMyQ
 
             var newToken = await PostAsync<Token>(MyQURLs.TokenUri, content);
             CreateConfigAndSave(newToken);
+            client = new RestClient();
             client.AddDefaultHeader("Authorization", GetBearerTokenString());
 
             return true;
@@ -325,12 +324,12 @@ namespace NMyQ
             return devices;
         }
 
-        public async Task SendDoorCommand(string doorSerial, string command)
+        public async Task<string> SendDoorCommand(string doorSerial, string command)
         {
             logger.LogInformation($"Sending command '{command}' to {doorSerial}");
             await CheckTokenState();
 
-            await PutAsync<string>(MyQURLs.GarageDoorCommandUri(this.config.AccountId, doorSerial, command));
+            return await PutAsync<string>(MyQURLs.GarageDoorCommandUri(this.config.AccountId, doorSerial, command));
         }
 
         public async Task<string> GetDoorState(string doorSerial)
@@ -347,7 +346,7 @@ namespace NMyQ
 
         private async Task CheckTokenState()
         {
-            if( config.TokenExpirationTime > DateTime.Now)
+            if( config.TokenExpirationTime < DateTime.Now)
             {
                 logger.LogInformation("Token expired, refreshing.");
                 await RefreshToken();
@@ -368,7 +367,7 @@ namespace NMyQ
             else
             {
                 //If much more logging is required
-                //logger.LogInformation($"Got {response.StatusCode}: {response.Content}");
+                logger.LogInformation($"Got {response.StatusCode}: {response.Content}");
             }
 
             if(string.IsNullOrEmpty(response.Content))
@@ -414,6 +413,8 @@ namespace NMyQ
         public void LoadConfig(MyQConfiguration myQConfiguration)
         {
             this.config = myQConfiguration;
+            client = new RestClient();
+            client.AddDefaultHeader("Authorization", GetBearerTokenString());
         }
         #endregion
     }

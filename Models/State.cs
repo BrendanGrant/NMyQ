@@ -10,7 +10,7 @@ namespace NMyQ.Models
         public string learn_status { get; set; }
         public bool has_camera { get; set; }
         public string battery_backup_state { get; set; }
-        public List<object> active_fault_codes { get; set; }
+        public List<ActiveFaultCode> active_fault_codes { get; set; }
         public string attached_camera_serial_number { get; set; }
         public string door_state { get; set; }
         public DateTime last_update { get; set; }
