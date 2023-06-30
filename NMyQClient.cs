@@ -299,7 +299,7 @@ namespace NMyQ
                 logger.LogWarning($"Assuming first");
             }
 
-            if (this.config.AccountId == null)
+            if (string.IsNullOrEmpty(this.config.AccountId))
             {
                 this.config.AccountId = accountInfo.accounts[0].id;
             }
