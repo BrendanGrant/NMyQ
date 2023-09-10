@@ -44,7 +44,7 @@ namespace NMyQ
 
             var redirectResponse = await OauthRedirect(oauthLoginResponse);
 
-            await GetToken(redirectResponse, codeVerifier);
+            await GetToken(redirectResponse, codeVerifier, account);
 
             await LoadAccounts();
         }
@@ -198,7 +198,7 @@ namespace NMyQ
         }
 
 
-        async Task GetToken(HttpResponseMessage response, string codeVerifier)
+        async Task GetToken(HttpResponseMessage response, string codeVerifier, string accountId)
         {
             logger.LogInformation("Doing GetToken()...");
             if (response.StatusCode == HttpStatusCode.Found)
@@ -218,7 +218,7 @@ namespace NMyQ
                 };
 
                 var newToken = await PostAsync<Token>(MyQURLs.TokenUri, content2);
-                CreateConfigAndSave(newToken);
+                CreateConfigAndSave(newToken, accountId);
                 client = new RestClient();
                 client.AddDefaultHeader("Authorization", GetBearerTokenString());
             }
@@ -266,16 +266,16 @@ namespace NMyQ
                 };
 
             var newToken = await PostAsync<Token>(MyQURLs.TokenUri, content);
-            CreateConfigAndSave(newToken);
+            CreateConfigAndSave(newToken, config.AccountId);
             client = new RestClient();
             client.AddDefaultHeader("Authorization", GetBearerTokenString());
 
             return true;
         }
 
-        private void CreateConfigAndSave(Token token)
+        private void CreateConfigAndSave(Token token, string accountId)
         {
-            config = MyQConfiguration.FromToken(token, config?.AccountId);
+            config = MyQConfiguration.FromToken(token, accountId);
             if( savingAction != null)
             {
                 savingAction(config);
